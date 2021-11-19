@@ -53,13 +53,14 @@ else ifeq ($(RESTY_IMAGE_TAG),xenial)
 else ifeq ($(RESTY_IMAGE_BASE),alpine)
 	BUILDX=true
 endif
+BUILDX=true
 
 BUILDX_INFO ?= $(shell docker buildx 2>&1 >/dev/null; echo $?)
 
 ifeq ($(BUILDX),false)
 	DOCKER_COMMAND?=docker build --build-arg BUILDPLATFORM=x/amd64
 else
-	DOCKER_COMMAND?=docker buildx build --push --platform="linux/amd64,linux/arm64"
+	DOCKER_COMMAND?=docker buildx build --push --platform="linux/arm64"
 endif
 
 # Cache gets automatically busted every week. Set this to unique value to skip the cache
@@ -113,19 +114,19 @@ ifeq ($(RESTY_IMAGE_BASE),src)
 	@echo "nothing to be done"
 else ifeq ($(BUILDX),true)
 	docker buildx create --name multibuilder
-	docker-machine create --driver amazonec2 \
-	--amazonec2-instance-type a1.xlarge \
-	--amazonec2-region us-east-1 \
-	--amazonec2-ami ami-0c46f9f09e3a8c2b5 \
-	--amazonec2-vpc-id vpc-74f9ac0c \
-	--amazonec2-monitoring \
-	--amazonec2-tags created-by,${USER} ${DOCKER_MACHINE_ARM64_NAME}
-	docker context create ${DOCKER_MACHINE_ARM64_NAME} --docker \
-	host=tcp://`docker-machine config ${DOCKER_MACHINE_ARM64_NAME} | grep tcp | awk -F "//" '{print $$2}'`,\
-	ca=`docker-machine config ${DOCKER_MACHINE_ARM64_NAME} | grep tlscacert | awk -F "=" '{print $$2}' | tr -d "\""`,\
-	cert=`docker-machine config ${DOCKER_MACHINE_ARM64_NAME} | grep tlscert | awk -F "=" '{print $$2}' | tr -d "\""`,\
-	key=`docker-machine config ${DOCKER_MACHINE_ARM64_NAME} | grep tlskey | awk -F "=" '{print $$2}' | tr -d "\""`
-	docker buildx create --name multibuilder --append ${DOCKER_MACHINE_ARM64_NAME}
+#	docker-machine create --driver amazonec2 \
+#	--amazonec2-instance-type a1.xlarge \
+#	--amazonec2-region us-east-1 \
+#	--amazonec2-ami ami-0c46f9f09e3a8c2b5 \
+#	--amazonec2-vpc-id vpc-74f9ac0c \
+#	--amazonec2-monitoring \
+#	--amazonec2-tags created-by,${USER} ${DOCKER_MACHINE_ARM64_NAME}
+#	docker context create ${DOCKER_MACHINE_ARM64_NAME} --docker \
+#	host=tcp://`docker-machine config ${DOCKER_MACHINE_ARM64_NAME} | grep tcp | awk -F "//" '{print $$2}'`,\
+#	ca=`docker-machine config ${DOCKER_MACHINE_ARM64_NAME} | grep tlscacert | awk -F "=" '{print $$2}' | tr -d "\""`,\
+#	cert=`docker-machine config ${DOCKER_MACHINE_ARM64_NAME} | grep tlscert | awk -F "=" '{print $$2}' | tr -d "\""`,\
+#	key=`docker-machine config ${DOCKER_MACHINE_ARM64_NAME} | grep tlskey | awk -F "=" '{print $$2}' | tr -d "\""`
+#	docker buildx create --name multibuilder --append ${DOCKER_MACHINE_ARM64_NAME}
 	docker buildx inspect multibuilder --bootstrap
 	docker buildx use multibuilder
 endif
@@ -213,7 +214,7 @@ ifeq ($(BUILDX),false)
 	mv output/output/*.$(PACKAGE_TYPE)* output/
 	rm -rf output/*/
 else
-	docker buildx build --output output --platform linux/amd64,linux/arm64 -f dockerfiles/Dockerfile.scratch \
+	docker buildx build --output output --platform linux/arm64 -f dockerfiles/Dockerfile.scratch \
 	--build-arg RESTY_IMAGE_TAG="$(RESTY_IMAGE_TAG)" \
 	--build-arg RESTY_IMAGE_BASE=$(RESTY_IMAGE_BASE) \
 	--build-arg DOCKER_REPOSITORY=$(DOCKER_REPOSITORY) \
