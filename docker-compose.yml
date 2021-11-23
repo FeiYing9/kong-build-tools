@@ -7,7 +7,7 @@ services:
       - 15002:9000
       - 15003:9001
   redis:
-    image: redis:5.0.9-alpine
+    image: arm64v8/redis:5.0.9-alpine
     ports:
       - 6379:6379
     expose:
@@ -18,7 +18,7 @@ services:
       timeout: 10s
       retries: 10
   kong:
-    image: mashape/kong-build-tools:test
+    image: feiying999/kong-ecs-arm:test
     privileged: true
     network_mode: host
     container_name: kong
@@ -58,7 +58,7 @@ services:
     tty: true
     restart: on-failure
   cassandra:
-    image: cassandra:${CASSANDRA_VERSION:-3.9}
+    image: arm64v8/cassandra:${CASSANDRA_VERSION:-3.11}
     environment:
       MAX_HEAP_SIZE: 256M
       HEAP_NEWSIZE: 128M
@@ -75,7 +75,7 @@ services:
       retries: 10
     restart: on-failure
   postgres:
-    image: postgres:${POSTGRES_VERSION:-13}
+    image: arm64v8/postgres:${POSTGRES_VERSION:-13}
     environment:
       POSTGRES_HOST_AUTH_METHOD: trust
       POSTGRES_DB: ${KONG_PG_DATABASE:-kong_tests}

@@ -32,7 +32,7 @@ RUN ln -fs /usr/share/zoneinfo/America/New_York /etc/localtime && \
     dpkg-reconfigure --frontend noninteractive tzdata && \
     apt-get install -y postgresql
 
-RUN curl -L https://dl.google.com/go/go${GO_VERSION}.linux-amd64.tar.gz \
+RUN curl -L https://dl.google.com/go/go${GO_VERSION}.linux-arm64.tar.gz \
 	-o /tmp/go.tar.gz && \
 	cd /tmp && tar -xf go.tar.gz
 
